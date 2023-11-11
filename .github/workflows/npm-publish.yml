@@ -34,25 +34,6 @@ jobs:
             - run: npm run docs
             - run: npm run build:all
 
-    deploy-pages:
-        needs: build
-        environment:
-            name: github-pages
-            url: ${{ steps.deployment.outputs.page_url }}
-        runs-on: ubuntu-latest
-        steps:
-            - name: Checkout
-              uses: actions/checkout@v3
-            - name: Setup Pages
-              uses: actions/configure-pages@v3
-            - name: Upload artifact
-              uses: actions/upload-pages-artifact@v2
-              with:
-                  path: "docs"
-            - name: Deploy to GitHub Pages
-              id: deployment
-              uses: actions/deploy-pages@v2
-
     publish-npm:
         needs: build
         runs-on: ubuntu-latest
@@ -64,6 +45,33 @@ jobs:
                   registry-url: https://registry.npmjs.org/
             - run: npm ci
             - run: npm run build:all
-            - run: npm publish
+            - run: npm publish --access public
               env:
                   NODE_AUTH_TOKEN: ${{secrets.npm_token}}
+
+    deploy-pages:
+        needs: publish-npm
+        environment:
+            name: github-pages
+            url: ${{ steps.deployment.outputs.page_url }}
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v3
+            - uses: actions/setup-node@v3
+              with:
+                  node-version: 16
+                  registry-url: https://registry.npmjs.org/
+
+            - run: npm ci
+            - run: npm run docs
+
+            - name: Setup Pages
+              uses: actions/configure-pages@v3
+            - name: Upload artifact
+              uses: actions/upload-pages-artifact@v2
+              with:
+                  path: "docs"
+            - name: Deploy to GitHub Pages
+              id: deployment
+              uses: actions/deploy-pages@v2
