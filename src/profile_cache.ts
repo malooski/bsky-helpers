@@ -22,9 +22,7 @@ export interface ProfileCacheArgs {
 
 export class ProfileCache {
     profileCache: LRUCache<string, ProfileData>;
-
     agent: BskyAgent;
-
     handleResolver: HandleResolver;
 
     constructor(args: ProfileCacheArgs) {
