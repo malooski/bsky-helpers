@@ -4,30 +4,52 @@
 name: Node.js Package
 
 on:
-  release:
-    types: [created]
+    release:
+        types: [created]
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version: 16
-      - run: npm ci
-      - run: npm test
+    build:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v3
+            - uses: actions/setup-node@v3
+              with:
+                  node-version: 16
+            - run: npm ci
+            - run: npm build
+            - run: npm test
+            - run: npm run lint
+            - run: npm run docs
 
-  publish-npm:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version: 16
-          registry-url: https://registry.npmjs.org/
-      - run: npm ci
-      - run: npm publish
-        env:
-          NODE_AUTH_TOKEN: ${{secrets.npm_token}}
+    deploy-pages:
+        needs: build
+        environment:
+            name: github-pages
+            url: ${{ steps.deployment.outputs.page_url }}
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v3
+            - name: Setup Pages
+              uses: actions/configure-pages@v3
+            - name: Upload artifact
+              uses: actions/upload-pages-artifact@v2
+              with:
+                  path: "docs"
+            - name: Deploy to GitHub Pages
+              id: deployment
+              uses: actions/deploy-pages@v2
+
+    publish-npm:
+        needs: build
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v3
+            - uses: actions/setup-node@v3
+              with:
+                  node-version: 16
+                  registry-url: https://registry.npmjs.org/
+            - run: npm ci
+            - run: npm publish
+              env:
+                  NODE_AUTH_TOKEN: ${{secrets.npm_token}}

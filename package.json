@@ -9,8 +9,8 @@
     "scripts": {
         "test": "node --test --loader ts-node/esm ./src/*.spec.ts",
         "build": "tsc",
-        "prepare": "tshy",
-        "lint": "eslint .",
+        "build:all": "tshy",
+        "lint": "eslint src/**/*.ts",
         "docs": "typedoc --out docs src",
         "docs:serve": "npm run docs && http-server docs -p 8080 -o"
     },
