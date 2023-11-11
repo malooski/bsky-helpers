@@ -16,10 +16,11 @@ jobs:
               with:
                   node-version: 16
             - run: npm ci
-            - run: npm build
+            - run: npm run build
             - run: npm test
             - run: npm run lint
             - run: npm run docs
+            - run: npm run build:all
 
     deploy-pages:
         needs: build
@@ -50,6 +51,7 @@ jobs:
                   node-version: 16
                   registry-url: https://registry.npmjs.org/
             - run: npm ci
+            - run: npm run build:all
             - run: npm publish
               env:
                   NODE_AUTH_TOKEN: ${{secrets.npm_token}}
